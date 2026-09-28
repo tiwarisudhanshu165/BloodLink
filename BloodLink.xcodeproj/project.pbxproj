@@ -24,6 +24,9 @@
 		3F6687D93066731900F78A61 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3F6687D83066731900F78A61 /* FirebaseAuth */; };
 		3F6687DB3066731900F78A61 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 3F6687DA3066731900F78A61 /* FirebaseDatabase */; };
 		3F6687DD3066731900F78A61 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F6687DC3066731900F78A61 /* FirebaseFirestore */; };
+		3FA7BC78306A662200B359DA /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA7BC77306A662200B359DA /* Models.swift */; };
+		3FA7BC7A306A666700B359DA /* Donorprofileview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA7BC79306A666700B359DA /* Donorprofileview.swift */; };
+		3FA7BC7C306A669900B359DA /* Createrequestview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA7BC7B306A669900B359DA /* Createrequestview.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +64,9 @@
 		3F0C7A88306A42FD00E8BE81 /* Admindashboardview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Admindashboardview.swift; sourceTree = "<group>"; };
 		3F0C7A8A306A43F600E8BE81 /* Bloodlinkapp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bloodlinkapp.swift; sourceTree = "<group>"; };
 		3F6687CE3066666E00F78A61 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		3FA7BC77306A662200B359DA /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		3FA7BC79306A666700B359DA /* Donorprofileview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Donorprofileview.swift; sourceTree = "<group>"; };
+		3FA7BC7B306A669900B359DA /* Createrequestview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Createrequestview.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +122,9 @@
 			isa = PBXGroup;
 			children = (
 				3F0C7A82306A429900E8BE81 /* Rootview.swift */,
+				3FA7BC77306A662200B359DA /* Models.swift */,
+				3FA7BC79306A666700B359DA /* Donorprofileview.swift */,
+				3FA7BC7B306A669900B359DA /* Createrequestview.swift */,
 				3F0C7A7A306A41CF00E8BE81 /* AuthViewModel.swift */,
 				3F0C7A84306A42BF00E8BE81 /* Requesterdashboardview.swift */,
 				3F0C7A8A306A43F600E8BE81 /* Bloodlinkapp.swift */,
@@ -302,11 +311,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F0C7A87306A42D900E8BE81 /*  Donordashboardview.swift in Sources */,
+				3FA7BC7A306A666700B359DA /* Donorprofileview.swift in Sources */,
 				3F0C7A89306A42FD00E8BE81 /* Admindashboardview.swift in Sources */,
 				3F0C7A85306A42BF00E8BE81 /* Requesterdashboardview.swift in Sources */,
 				3F0C7A7D306A421200E8BE81 /* Loginview.swift in Sources */,
 				3F0C7A8B306A43F600E8BE81 /* Bloodlinkapp.swift in Sources */,
 				3F0C7A81306A427900E8BE81 /* Registerview.swift in Sources */,
+				3FA7BC7C306A669900B359DA /* Createrequestview.swift in Sources */,
+				3FA7BC78306A662200B359DA /* Models.swift in Sources */,
 				3F0C7A7B306A41CF00E8BE81 /* AuthViewModel.swift in Sources */,
 				3F0C7A83306A429900E8BE81 /* Rootview.swift in Sources */,
 			);
