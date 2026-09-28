@@ -1,10 +1,12 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct RequesterDashboardView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var requests: [BloodRequest] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var listener: ListenerRegistration?
 
     var body: some View {
         NavigationStack {
@@ -40,25 +42,34 @@ struct RequesterDashboardView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Log Out") {
+                        stopListening()
                         authViewModel.signOut()
                     }
                 }
             }
-            .onAppear {
-                Task { await loadRequests() }
-            }
+            .onAppear { startListening() }
+            .onDisappear { stopListening() }
         }
     }
 
-    private func loadRequests() async {
-        guard let uid = authViewModel.userSession?.uid else { return }
-        do {
-            requests = try await DataService.shared.fetchRequests(requesterId: uid)
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
+    private func startListening() {
+        guard listener == nil,
+              let uid = authViewModel.userSession?.uid else { return }
+        listener = DataService.shared.listenToRequests(requesterId: uid) { result in
+            switch result {
+            case .success(let items):
+                requests = items
+                errorMessage = nil
+            case .failure(let error):
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
         }
-        isLoading = false
+    }
+
+    private func stopListening() {
+        listener?.remove()
+        listener = nil
     }
 }
 
@@ -84,4 +95,3 @@ private struct RequestRow: View {
         .padding(.vertical, 2)
     }
 }
-

@@ -1,11 +1,24 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct DonorDashboardView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var profile: DonorProfile?
-    @State private var matchingRequests: [BloodRequest] = []
+    @State private var openRequests: [BloodRequest] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var profileListener: ListenerRegistration?
+    @State private var requestsListener: ListenerRegistration?
+    @State private var listeningGroup: BloodGroup?
+
+    // Requests that match this donor's blood group, city and availability
+    private var matchingRequests: [BloodRequest] {
+        guard let profile, profile.isAvailable,
+              let uid = authViewModel.userSession?.uid else { return [] }
+        return openRequests.filter {
+            sameCity($0.city, profile.city) && $0.requesterId != uid
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -57,13 +70,13 @@ struct DonorDashboardView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Log Out") {
+                        stopListening()
                         authViewModel.signOut()
                     }
                 }
             }
-            .onAppear {
-                Task { await load() }
-            }
+            .onAppear { startListening() }
+            .onDisappear { stopListening() }
         }
     }
 
@@ -72,24 +85,47 @@ struct DonorDashboardView: View {
         b.trimmingCharacters(in: .whitespaces).lowercased()
     }
 
-    private func load() async {
-        guard let uid = authViewModel.userSession?.uid else { return }
-        profile = try? await DataService.shared.fetchDonorProfile(uid: uid)
+    private func startListening() {
+        guard profileListener == nil,
+              let uid = authViewModel.userSession?.uid else { return }
 
-        if let profile, profile.isAvailable {
-            do {
-                let openRequests = try await DataService.shared.fetchOpenRequests(bloodGroup: profile.bloodGroup)
-                matchingRequests = openRequests.filter {
-                    sameCity($0.city, profile.city) && $0.requesterId != uid
-                }
+        profileListener = DataService.shared.listenToDonorProfile(uid: uid) { newProfile in
+            profile = newProfile
+            isLoading = false
+            updateRequestsListener()
+        }
+    }
+
+    // Re-attaches the requests listener whenever the donor's blood group changes
+    private func updateRequestsListener() {
+        guard let group = profile?.bloodGroup else {
+            requestsListener?.remove()
+            requestsListener = nil
+            listeningGroup = nil
+            openRequests = []
+            return
+        }
+        if group == listeningGroup { return }
+
+        requestsListener?.remove()
+        listeningGroup = group
+        requestsListener = DataService.shared.listenToOpenRequests(bloodGroup: group) { result in
+            switch result {
+            case .success(let items):
+                openRequests = items
                 errorMessage = nil
-            } catch {
+            case .failure(let error):
                 errorMessage = error.localizedDescription
             }
-        } else {
-            matchingRequests = []
         }
-        isLoading = false
+    }
+
+    private func stopListening() {
+        profileListener?.remove()
+        requestsListener?.remove()
+        profileListener = nil
+        requestsListener = nil
+        listeningGroup = nil
     }
 }
 
@@ -101,6 +137,7 @@ private struct IncomingRequestRow: View {
     @State private var myResponse: Bool?
     @State private var isSending = false
     @State private var errorMessage: String?
+    @State private var responseListener: ListenerRegistration?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -151,8 +188,15 @@ private struct IncomingRequestRow: View {
             }
         }
         .padding(.vertical, 4)
-        .task {
-            myResponse = try? await DataService.shared.fetchMyResponse(requestId: request.id, donorId: donorId)
+        .onAppear {
+            guard responseListener == nil else { return }
+            responseListener = DataService.shared.listenToMyResponse(requestId: request.id, donorId: donorId) { value in
+                myResponse = value
+            }
+        }
+        .onDisappear {
+            responseListener?.remove()
+            responseListener = nil
         }
     }
 
@@ -169,11 +213,9 @@ private struct IncomingRequestRow: View {
         )
         do {
             try await DataService.shared.submitResponse(response)
-            myResponse = available
         } catch {
             errorMessage = error.localizedDescription
         }
         isSending = false
     }
 }
-

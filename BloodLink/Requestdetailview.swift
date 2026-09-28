@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct RequestDetailView: View {
     let request: BloodRequest
@@ -6,6 +7,7 @@ struct RequestDetailView: View {
     @State private var responses: [DonorResponse] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var listener: ListenerRegistration?
 
     private var availableDonors: [DonorResponse] {
         responses.filter { $0.isAvailable }
@@ -63,18 +65,21 @@ struct RequestDetailView: View {
         }
         .navigationTitle("Request Details")
         .onAppear {
-            Task { await loadResponses() }
+            guard listener == nil else { return }
+            listener = DataService.shared.listenToResponses(requestId: request.id) { result in
+                switch result {
+                case .success(let items):
+                    responses = items
+                    errorMessage = nil
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
+                }
+                isLoading = false
+            }
         }
-    }
-
-    private func loadResponses() async {
-        do {
-            responses = try await DataService.shared.fetchResponses(requestId: request.id)
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
+        .onDisappear {
+            listener?.remove()
+            listener = nil
         }
-        isLoading = false
     }
 }
-

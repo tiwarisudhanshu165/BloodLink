@@ -228,4 +228,77 @@ final class DataService {
             .compactMap { DonorResponse(id: $0.documentID, requestId: requestId, data: $0.data()) }
             .sorted { $0.respondedAt > $1.respondedAt }
     }
+
+    // MARK: Phase 5 – real-time listeners
+    // Each function returns a ListenerRegistration. Call .remove() on it when the screen disappears.
+
+    func listenToDonorProfile(uid: String,
+                              onChange: @escaping (DonorProfile?) -> Void) -> ListenerRegistration {
+        db.collection("donors").document(uid).addSnapshotListener { snapshot, _ in
+            if let data = snapshot?.data() {
+                onChange(DonorProfile(data: data))
+            } else {
+                onChange(nil)
+            }
+        }
+    }
+
+    func listenToRequests(requesterId: String,
+                          onChange: @escaping (Result<[BloodRequest], Error>) -> Void) -> ListenerRegistration {
+        db.collection("requests")
+            .whereField("requesterId", isEqualTo: requesterId)
+            .addSnapshotListener { snapshot, error in
+                if let error {
+                    onChange(.failure(error))
+                    return
+                }
+                let items = (snapshot?.documents ?? [])
+                    .compactMap { BloodRequest(id: $0.documentID, data: $0.data()) }
+                    .sorted { $0.createdAt > $1.createdAt }
+                onChange(.success(items))
+            }
+    }
+
+    func listenToOpenRequests(bloodGroup: BloodGroup,
+                              onChange: @escaping (Result<[BloodRequest], Error>) -> Void) -> ListenerRegistration {
+        db.collection("requests")
+            .whereField("bloodGroup", isEqualTo: bloodGroup.rawValue)
+            .whereField("status", isEqualTo: RequestStatus.open.rawValue)
+            .addSnapshotListener { snapshot, error in
+                if let error {
+                    onChange(.failure(error))
+                    return
+                }
+                let items = (snapshot?.documents ?? [])
+                    .compactMap { BloodRequest(id: $0.documentID, data: $0.data()) }
+                    .sorted { $0.createdAt > $1.createdAt }
+                onChange(.success(items))
+            }
+    }
+
+    func listenToMyResponse(requestId: String, donorId: String,
+                            onChange: @escaping (Bool?) -> Void) -> ListenerRegistration {
+        db.collection("requests").document(requestId)
+            .collection("responses").document(donorId)
+            .addSnapshotListener { snapshot, _ in
+                onChange(snapshot?.data()?["isAvailable"] as? Bool)
+            }
+    }
+
+    func listenToResponses(requestId: String,
+                           onChange: @escaping (Result<[DonorResponse], Error>) -> Void) -> ListenerRegistration {
+        db.collection("requests").document(requestId)
+            .collection("responses")
+            .addSnapshotListener { snapshot, error in
+                if let error {
+                    onChange(.failure(error))
+                    return
+                }
+                let items = (snapshot?.documents ?? [])
+                    .compactMap { DonorResponse(id: $0.documentID, requestId: requestId, data: $0.data()) }
+                    .sorted { $0.respondedAt > $1.respondedAt }
+                onChange(.success(items))
+            }
+    }
 }
+
