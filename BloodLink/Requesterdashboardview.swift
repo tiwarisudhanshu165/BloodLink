@@ -27,7 +27,11 @@ struct RequesterDashboardView: View {
                             .foregroundColor(.secondary)
                     } else {
                         ForEach(requests) { request in
-                            RequestRow(request: request)
+                            NavigationLink {
+                                RequestDetailView(request: request)
+                            } label: {
+                                RequestRow(request: request)
+                            }
                         }
                     }
                 }
@@ -80,3 +84,4 @@ private struct RequestRow: View {
         .padding(.vertical, 2)
     }
 }
+

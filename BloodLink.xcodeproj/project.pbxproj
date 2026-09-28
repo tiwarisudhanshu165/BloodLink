@@ -27,6 +27,7 @@
 		3FA7BC78306A662200B359DA /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA7BC77306A662200B359DA /* Models.swift */; };
 		3FA7BC7A306A666700B359DA /* Donorprofileview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA7BC79306A666700B359DA /* Donorprofileview.swift */; };
 		3FA7BC7C306A669900B359DA /* Createrequestview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA7BC7B306A669900B359DA /* Createrequestview.swift */; };
+		3FA7BC7E306A6A6B00B359DA /* Requestdetailview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA7BC7D306A6A6B00B359DA /* Requestdetailview.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,7 @@
 		3FA7BC77306A662200B359DA /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		3FA7BC79306A666700B359DA /* Donorprofileview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Donorprofileview.swift; sourceTree = "<group>"; };
 		3FA7BC7B306A669900B359DA /* Createrequestview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Createrequestview.swift; sourceTree = "<group>"; };
+		3FA7BC7D306A6A6B00B359DA /* Requestdetailview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Requestdetailview.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +126,7 @@
 				3F0C7A82306A429900E8BE81 /* Rootview.swift */,
 				3FA7BC77306A662200B359DA /* Models.swift */,
 				3FA7BC79306A666700B359DA /* Donorprofileview.swift */,
+				3FA7BC7D306A6A6B00B359DA /* Requestdetailview.swift */,
 				3FA7BC7B306A669900B359DA /* Createrequestview.swift */,
 				3F0C7A7A306A41CF00E8BE81 /* AuthViewModel.swift */,
 				3F0C7A84306A42BF00E8BE81 /* Requesterdashboardview.swift */,
@@ -315,6 +318,7 @@
 				3F0C7A89306A42FD00E8BE81 /* Admindashboardview.swift in Sources */,
 				3F0C7A85306A42BF00E8BE81 /* Requesterdashboardview.swift in Sources */,
 				3F0C7A7D306A421200E8BE81 /* Loginview.swift in Sources */,
+				3FA7BC7E306A6A6B00B359DA /* Requestdetailview.swift in Sources */,
 				3F0C7A8B306A43F600E8BE81 /* Bloodlinkapp.swift in Sources */,
 				3F0C7A81306A427900E8BE81 /* Registerview.swift in Sources */,
 				3FA7BC7C306A669900B359DA /* Createrequestview.swift in Sources */,

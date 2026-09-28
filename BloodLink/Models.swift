@@ -132,8 +132,37 @@ struct DonorResponse: Identifiable {
     var id: String            // donor's uid
     var requestId: String
     var donorName: String
+    var donorPhone: String
+    var bloodGroup: BloodGroup
     var isAvailable: Bool
     var respondedAt: Date = Date()
+}
+
+extension DonorResponse {
+    init?(id: String, requestId: String, data: [String: Any]) {
+        guard let donorName = data["donorName"] as? String,
+              let donorPhone = data["donorPhone"] as? String,
+              let groupRaw = data["bloodGroup"] as? String,
+              let group = BloodGroup(rawValue: groupRaw),
+              let isAvailable = data["isAvailable"] as? Bool else { return nil }
+        self.init(id: id,
+                  requestId: requestId,
+                  donorName: donorName,
+                  donorPhone: donorPhone,
+                  bloodGroup: group,
+                  isAvailable: isAvailable,
+                  respondedAt: (data["respondedAt"] as? Timestamp)?.dateValue() ?? Date())
+    }
+
+    var dictionary: [String: Any] {
+        [
+            "donorName": donorName,
+            "donorPhone": donorPhone,
+            "bloodGroup": bloodGroup.rawValue,
+            "isAvailable": isAvailable,
+            "respondedAt": Timestamp(date: respondedAt)
+        ]
+    }
 }
 
 // MARK: - Firestore service
@@ -165,5 +194,38 @@ final class DataService {
         return snapshot.documents
             .compactMap { BloodRequest(id: $0.documentID, data: $0.data()) }
             .sorted { $0.createdAt > $1.createdAt }
+    }
+
+    // MARK: Phase 4 – matching and responses
+
+    /// Open requests that need a given blood group (city/availability filtering happens in the view).
+    func fetchOpenRequests(bloodGroup: BloodGroup) async throws -> [BloodRequest] {
+        let snapshot = try await db.collection("requests")
+            .whereField("bloodGroup", isEqualTo: bloodGroup.rawValue)
+            .whereField("status", isEqualTo: RequestStatus.open.rawValue)
+            .getDocuments()
+        return snapshot.documents
+            .compactMap { BloodRequest(id: $0.documentID, data: $0.data()) }
+            .sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func submitResponse(_ response: DonorResponse) async throws {
+        try await db.collection("requests").document(response.requestId)
+            .collection("responses").document(response.id)
+            .setData(response.dictionary)
+    }
+
+    func fetchMyResponse(requestId: String, donorId: String) async throws -> Bool? {
+        let doc = try await db.collection("requests").document(requestId)
+            .collection("responses").document(donorId).getDocument()
+        return doc.data()?["isAvailable"] as? Bool
+    }
+
+    func fetchResponses(requestId: String) async throws -> [DonorResponse] {
+        let snapshot = try await db.collection("requests").document(requestId)
+            .collection("responses").getDocuments()
+        return snapshot.documents
+            .compactMap { DonorResponse(id: $0.documentID, requestId: requestId, data: $0.data()) }
+            .sorted { $0.respondedAt > $1.respondedAt }
     }
 }
