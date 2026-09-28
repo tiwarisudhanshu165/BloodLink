@@ -7,13 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3F09122830665CA500C0F33C /* BloodLinkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F09122730665CA500C0F33C /* BloodLinkApp.swift */; };
-		3F09122A30665CA500C0F33C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F09122930665CA500C0F33C /* ContentView.swift */; };
 		3F09122C30665CA600C0F33C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3F09122B30665CA600C0F33C /* Assets.xcassets */; };
 		3F09122F30665CA600C0F33C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3F09122E30665CA600C0F33C /* Preview Assets.xcassets */; };
 		3F09123930665CA600C0F33C /* BloodLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F09123830665CA600C0F33C /* BloodLinkTests.swift */; };
 		3F09124330665CA700C0F33C /* BloodLinkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F09124230665CA700C0F33C /* BloodLinkUITests.swift */; };
 		3F09124530665CA700C0F33C /* BloodLinkUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F09124430665CA700C0F33C /* BloodLinkUITestsLaunchTests.swift */; };
+		3F0C7A7B306A41CF00E8BE81 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0C7A7A306A41CF00E8BE81 /* AuthViewModel.swift */; };
+		3F0C7A7D306A421200E8BE81 /* Loginview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0C7A7C306A421200E8BE81 /* Loginview.swift */; };
+		3F0C7A81306A427900E8BE81 /* Registerview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0C7A80306A427900E8BE81 /* Registerview.swift */; };
+		3F0C7A83306A429900E8BE81 /* Rootview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0C7A82306A429900E8BE81 /* Rootview.swift */; };
+		3F0C7A85306A42BF00E8BE81 /* Requesterdashboardview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0C7A84306A42BF00E8BE81 /* Requesterdashboardview.swift */; };
+		3F0C7A87306A42D900E8BE81 /*  Donordashboardview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0C7A86306A42D900E8BE81 /*  Donordashboardview.swift */; };
+		3F0C7A89306A42FD00E8BE81 /* Admindashboardview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0C7A88306A42FD00E8BE81 /* Admindashboardview.swift */; };
+		3F0C7A8B306A43F600E8BE81 /* Bloodlinkapp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0C7A8A306A43F600E8BE81 /* Bloodlinkapp.swift */; };
+		3F6687CF3066666E00F78A61 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F6687CE3066666E00F78A61 /* GoogleService-Info.plist */; };
+		3F6687D93066731900F78A61 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3F6687D83066731900F78A61 /* FirebaseAuth */; };
+		3F6687DB3066731900F78A61 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 3F6687DA3066731900F78A61 /* FirebaseDatabase */; };
+		3F6687DD3066731900F78A61 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 3F6687DC3066731900F78A61 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,8 +45,6 @@
 
 /* Begin PBXFileReference section */
 		3F09122430665CA500C0F33C /* BloodLink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BloodLink.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		3F09122730665CA500C0F33C /* BloodLinkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloodLinkApp.swift; sourceTree = "<group>"; };
-		3F09122930665CA500C0F33C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3F09122B30665CA600C0F33C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3F09122E30665CA600C0F33C /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3F09123430665CA600C0F33C /* BloodLinkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BloodLinkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -44,6 +52,15 @@
 		3F09123E30665CA700C0F33C /* BloodLinkUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BloodLinkUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F09124230665CA700C0F33C /* BloodLinkUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloodLinkUITests.swift; sourceTree = "<group>"; };
 		3F09124430665CA700C0F33C /* BloodLinkUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloodLinkUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		3F0C7A7A306A41CF00E8BE81 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		3F0C7A7C306A421200E8BE81 /* Loginview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Loginview.swift; sourceTree = "<group>"; };
+		3F0C7A80306A427900E8BE81 /* Registerview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Registerview.swift; sourceTree = "<group>"; };
+		3F0C7A82306A429900E8BE81 /* Rootview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rootview.swift; sourceTree = "<group>"; };
+		3F0C7A84306A42BF00E8BE81 /* Requesterdashboardview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Requesterdashboardview.swift; sourceTree = "<group>"; };
+		3F0C7A86306A42D900E8BE81 /*  Donordashboardview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = " Donordashboardview.swift"; sourceTree = "<group>"; };
+		3F0C7A88306A42FD00E8BE81 /* Admindashboardview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Admindashboardview.swift; sourceTree = "<group>"; };
+		3F0C7A8A306A43F600E8BE81 /* Bloodlinkapp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bloodlinkapp.swift; sourceTree = "<group>"; };
+		3F6687CE3066666E00F78A61 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +68,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F6687DB3066731900F78A61 /* FirebaseDatabase in Frameworks */,
+				3F6687D93066731900F78A61 /* FirebaseAuth in Frameworks */,
+				3F6687DD3066731900F78A61 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +98,7 @@
 				3F09123730665CA600C0F33C /* BloodLinkTests */,
 				3F09124130665CA700C0F33C /* BloodLinkUITests */,
 				3F09122530665CA500C0F33C /* Products */,
+				3F6687D03066684700F78A61 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -94,8 +115,15 @@
 		3F09122630665CA500C0F33C /* BloodLink */ = {
 			isa = PBXGroup;
 			children = (
-				3F09122730665CA500C0F33C /* BloodLinkApp.swift */,
-				3F09122930665CA500C0F33C /* ContentView.swift */,
+				3F0C7A82306A429900E8BE81 /* Rootview.swift */,
+				3F0C7A7A306A41CF00E8BE81 /* AuthViewModel.swift */,
+				3F0C7A84306A42BF00E8BE81 /* Requesterdashboardview.swift */,
+				3F0C7A8A306A43F600E8BE81 /* Bloodlinkapp.swift */,
+				3F0C7A86306A42D900E8BE81 /*  Donordashboardview.swift */,
+				3F0C7A88306A42FD00E8BE81 /* Admindashboardview.swift */,
+				3F0C7A80306A427900E8BE81 /* Registerview.swift */,
+				3F0C7A7C306A421200E8BE81 /* Loginview.swift */,
+				3F6687CE3066666E00F78A61 /* GoogleService-Info.plist */,
 				3F09122B30665CA600C0F33C /* Assets.xcassets */,
 				3F09122D30665CA600C0F33C /* Preview Content */,
 			);
@@ -127,6 +155,13 @@
 			path = BloodLinkUITests;
 			sourceTree = "<group>";
 		};
+		3F6687D03066684700F78A61 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -143,6 +178,11 @@
 			dependencies = (
 			);
 			name = BloodLink;
+			packageProductDependencies = (
+				3F6687D83066731900F78A61 /* FirebaseAuth */,
+				3F6687DA3066731900F78A61 /* FirebaseDatabase */,
+				3F6687DC3066731900F78A61 /* FirebaseFirestore */,
+			);
 			productName = BloodLink;
 			productReference = 3F09122430665CA500C0F33C /* BloodLink.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +255,9 @@
 				Base,
 			);
 			mainGroup = 3F09121B30665CA500C0F33C;
+			packageReferences = (
+				3F6687D73066731900F78A61 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 3F09122530665CA500C0F33C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -233,6 +276,7 @@
 			files = (
 				3F09122F30665CA600C0F33C /* Preview Assets.xcassets in Resources */,
 				3F09122C30665CA600C0F33C /* Assets.xcassets in Resources */,
+				3F6687CF3066666E00F78A61 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,8 +301,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3F09122A30665CA500C0F33C /* ContentView.swift in Sources */,
-				3F09122830665CA500C0F33C /* BloodLinkApp.swift in Sources */,
+				3F0C7A87306A42D900E8BE81 /*  Donordashboardview.swift in Sources */,
+				3F0C7A89306A42FD00E8BE81 /* Admindashboardview.swift in Sources */,
+				3F0C7A85306A42BF00E8BE81 /* Requesterdashboardview.swift in Sources */,
+				3F0C7A7D306A421200E8BE81 /* Loginview.swift in Sources */,
+				3F0C7A8B306A43F600E8BE81 /* Bloodlinkapp.swift in Sources */,
+				3F0C7A81306A427900E8BE81 /* Registerview.swift in Sources */,
+				3F0C7A7B306A41CF00E8BE81 /* AuthViewModel.swift in Sources */,
+				3F0C7A83306A429900E8BE81 /* Rootview.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -582,6 +632,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3F6687D73066731900F78A61 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = exactVersion;
+				version = 10.29.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3F6687D83066731900F78A61 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F6687D73066731900F78A61 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		3F6687DA3066731900F78A61 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F6687D73066731900F78A61 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		3F6687DC3066731900F78A61 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F6687D73066731900F78A61 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3F09121C30665CA500C0F33C /* Project object */;
 }
