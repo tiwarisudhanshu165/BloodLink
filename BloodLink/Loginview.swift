@@ -6,6 +6,10 @@ struct LoginView: View {
     @State private var password = ""
     @State private var showRegister = false
 
+    // Used by the debug-only seeder button below
+    @State private var isSeeding = false
+    @State private var seedStatus: String?
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
@@ -46,6 +50,33 @@ struct LoginView: View {
                     showRegister = true
                 }
                 .font(.footnote)
+
+                #if DEBUG
+                Divider()
+
+                Button {
+                    Task {
+                        isSeeding = true
+                        seedStatus = "Seeding... this takes about 30 seconds."
+                        let success = await DemoSeeder.run()
+                        seedStatus = success
+                            ? "Demo data ready. Log in with any demo account (password: \(DemoSeeder.password))."
+                            : "Seeding failed. Check the Xcode console for details."
+                        isSeeding = false
+                    }
+                } label: {
+                    Text(isSeeding ? "Seeding..." : "Seed Demo Data (debug only)")
+                }
+                .font(.footnote)
+                .disabled(isSeeding)
+
+                if let seedStatus {
+                    Text(seedStatus)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                #endif
             }
             .padding()
             .sheet(isPresented: $showRegister) {
@@ -54,4 +85,3 @@ struct LoginView: View {
         }
     }
 }
-

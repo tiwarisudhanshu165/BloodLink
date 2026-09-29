@@ -201,6 +201,26 @@ final class DataService {
         try await db.collection("requests").document(id).delete()
     }
 
+    // MARK: Phase 7 – admin
+
+    /// All requests in the system, live, newest first. For the admin dashboard.
+    func listenToAllRequests(onChange: @escaping (Result<[BloodRequest], Error>) -> Void) -> ListenerRegistration {
+        db.collection("requests").addSnapshotListener { snapshot, error in
+            if let error {
+                onChange(.failure(error))
+                return
+            }
+            let items = (snapshot?.documents ?? [])
+                .compactMap { BloodRequest(id: $0.documentID, data: $0.data()) }
+                .sorted { $0.createdAt > $1.createdAt }
+            onChange(.success(items))
+        }
+    }
+
+    func setRequestStatus(id: String, status: RequestStatus) async throws {
+        try await db.collection("requests").document(id).setData(["status": status.rawValue], merge: true)
+    }
+
     func fetchRequests(requesterId: String) async throws -> [BloodRequest] {
         let snapshot = try await db.collection("requests")
             .whereField("requesterId", isEqualTo: requesterId)

@@ -15,6 +15,9 @@ struct RequestDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var isDeleting = false
     @State private var deleteError: String?
+    @State private var isUpdatingStatus = false
+    @State private var statusError: String?
+    @State private var currentStatus: RequestStatus = .open
 
     private var availableDonors: [DonorResponse] {
         responses.filter { $0.isAvailable }
@@ -34,11 +37,28 @@ struct RequestDetailView: View {
                 LabeledContent("City", value: request.city)
                 LabeledContent("Urgency", value: request.urgency.rawValue)
                 LabeledContent("Contact", value: request.contactPhone)
-                LabeledContent("Status", value: request.status.rawValue.capitalized)
+                LabeledContent("Status", value: currentStatus.rawValue.capitalized)
                 if !request.notes.isEmpty {
                     Text(request.notes)
                         .font(.footnote)
                         .foregroundColor(.secondary)
+                }
+            }
+
+            Section("Update Status") {
+                Text("Once you've arranged the donation, mark this request Fulfilled so donors stop seeing it. Reopen it if plans fall through.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                HStack {
+                    statusButton("Open", target: .open)
+                    statusButton("Fulfilled", target: .fulfilled)
+                    statusButton("Closed", target: .closed)
+                }
+                .disabled(isUpdatingStatus)
+                if let statusError {
+                    Text(statusError)
+                        .foregroundColor(.red)
+                        .font(.caption)
                 }
             }
 
@@ -120,6 +140,7 @@ struct RequestDetailView: View {
             Text("This also removes any donor responses to it. This can't be undone.")
         }
         .onAppear {
+            currentStatus = request.status
             guard listener == nil else { return }
             listener = DataService.shared.listenToResponses(requestId: request.id) { result in
                 switch result {
@@ -136,6 +157,29 @@ struct RequestDetailView: View {
             listener?.remove()
             listener = nil
         }
+    }
+
+    @ViewBuilder
+    private func statusButton(_ title: String, target: RequestStatus) -> some View {
+        Button(title) {
+            Task { await setStatus(target) }
+        }
+        .font(.caption)
+        .buttonStyle(.bordered)
+        .tint(currentStatus == target ? .accentColor : .secondary)
+        .disabled(currentStatus == target)
+    }
+
+    private func setStatus(_ status: RequestStatus) async {
+        isUpdatingStatus = true
+        statusError = nil
+        do {
+            try await DataService.shared.setRequestStatus(id: request.id, status: status)
+            currentStatus = status
+        } catch {
+            statusError = error.localizedDescription
+        }
+        isUpdatingStatus = false
     }
 
     private func deleteRequest() async {

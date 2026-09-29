@@ -77,7 +77,6 @@ final class NotificationManager: ObservableObject {
     private var responseListeners: [String: ListenerRegistration] = [:]
     private var myRequests: [String: BloodRequest] = [:]
     private var seenResponses: [String: Set<String>] = [:]
-    private var responseBaselineDone: Set<String> = []
 
     private func log(_ message: String) {
         print("[BloodLink notify] \(message)")
@@ -117,7 +116,6 @@ final class NotificationManager: ObservableObject {
         requestsBaselineDone = false
         myRequests = [:]
         seenResponses = [:]
-        responseBaselineDone = []
         currentUid = nil
         currentRole = nil
 
@@ -219,19 +217,17 @@ final class NotificationManager: ObservableObject {
             listener.remove()
             responseListeners[id] = nil
             seenResponses[id] = nil
-            responseBaselineDone.remove(id)
         }
     }
 
     private func handleResponses(_ responses: [DonorResponse], fromServer: Bool, requestId: String) {
         let keys = Set(responses.map { "\($0.id)-\($0.isAvailable)" })
-        let previous = seenResponses[requestId] ?? []
+        let previous = seenResponses[requestId]
         seenResponses[requestId] = keys
 
-        // Until the first real server snapshot arrives, just remember existing responses
-        if !responseBaselineDone.contains(requestId) {
-            if fromServer { responseBaselineDone.insert(requestId) }
-            log("requester baseline for request \(requestId.prefix(6)): \(responses.count) response(s), fromServer=\(fromServer)")
+        // First callback for this request just records what's already there — no banner yet.
+        guard let previous else {
+            log("requester baseline for request \(requestId.prefix(6)): \(responses.count) response(s)")
             return
         }
 
