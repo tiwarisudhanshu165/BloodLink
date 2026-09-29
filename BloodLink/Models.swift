@@ -187,6 +187,20 @@ final class DataService {
         _ = try await db.collection("requests").addDocument(data: request.dictionary)
     }
 
+    /// Edits an existing request in place. Keeps its original id, requesterId and createdAt.
+    func updateRequest(_ request: BloodRequest) async throws {
+        try await db.collection("requests").document(request.id).setData(request.dictionary, merge: true)
+    }
+
+    /// Deletes a request and every donor response under it.
+    func deleteRequest(id: String) async throws {
+        let responses = try await db.collection("requests").document(id).collection("responses").getDocuments()
+        for doc in responses.documents {
+            try await doc.reference.delete()
+        }
+        try await db.collection("requests").document(id).delete()
+    }
+
     func fetchRequests(requesterId: String) async throws -> [BloodRequest] {
         let snapshot = try await db.collection("requests")
             .whereField("requesterId", isEqualTo: requesterId)
@@ -301,4 +315,3 @@ final class DataService {
             }
     }
 }
-

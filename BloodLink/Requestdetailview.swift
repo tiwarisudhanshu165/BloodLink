@@ -4,10 +4,17 @@ import FirebaseFirestore
 struct RequestDetailView: View {
     let request: BloodRequest
 
+    @Environment(\.dismiss) var dismiss
+
     @State private var responses: [DonorResponse] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var listener: ListenerRegistration?
+
+    @State private var showEditSheet = false
+    @State private var showDeleteConfirm = false
+    @State private var isDeleting = false
+    @State private var deleteError: String?
 
     private var availableDonors: [DonorResponse] {
         responses.filter { $0.isAvailable }
@@ -62,8 +69,56 @@ struct RequestDetailView: View {
                     }
                 }
             }
+
+            if let deleteError {
+                Section {
+                    Text(deleteError)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                }
+            }
         }
         .navigationTitle("Request Details")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button {
+                        showEditSheet = true
+                    } label: {
+                        Label("Edit Request", systemImage: "pencil")
+                    }
+                    Button(role: .destructive) {
+                        showDeleteConfirm = true
+                    } label: {
+                        Label("Delete Request", systemImage: "trash")
+                    }
+                } label: {
+                    if isDeleting {
+                        ProgressView()
+                    } else {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
+                .disabled(isDeleting)
+            }
+        }
+        .sheet(isPresented: $showEditSheet) {
+            NavigationStack {
+                CreateRequestView(existingRequest: request)
+            }
+        }
+        .confirmationDialog(
+            "Delete this request?",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                Task { await deleteRequest() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This also removes any donor responses to it. This can't be undone.")
+        }
         .onAppear {
             guard listener == nil else { return }
             listener = DataService.shared.listenToResponses(requestId: request.id) { result in
@@ -80,6 +135,18 @@ struct RequestDetailView: View {
         .onDisappear {
             listener?.remove()
             listener = nil
+        }
+    }
+
+    private func deleteRequest() async {
+        isDeleting = true
+        deleteError = nil
+        do {
+            try await DataService.shared.deleteRequest(id: request.id)
+            dismiss()
+        } catch {
+            deleteError = error.localizedDescription
+            isDeleting = false
         }
     }
 }

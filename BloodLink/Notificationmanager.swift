@@ -10,6 +10,47 @@ struct BannerItem: Identifiable, Equatable {
     let isPositive: Bool   // green banner for good news, red for urgent requests
 }
 
+// MARK: - Listeners that also report whether the data came from the server
+// (Firestore first sends a possibly stale "cache" snapshot, then the real server one.
+//  We must not treat either of those as "something new happened".)
+
+extension DataService {
+    func watchOpenRequests(bloodGroup: BloodGroup,
+                           onChange: @escaping ([BloodRequest], Bool) -> Void) -> ListenerRegistration {
+        Firestore.firestore().collection("requests")
+            .whereField("bloodGroup", isEqualTo: bloodGroup.rawValue)
+            .whereField("status", isEqualTo: RequestStatus.open.rawValue)
+            .addSnapshotListener { snapshot, error in
+                if let error {
+                    print("[BloodLink notify] open requests listener error: \(error.localizedDescription)")
+                    return
+                }
+                guard let snapshot else { return }
+                let items = snapshot.documents.compactMap {
+                    BloodRequest(id: $0.documentID, data: $0.data())
+                }
+                onChange(items, !snapshot.metadata.isFromCache)
+            }
+    }
+
+    func watchResponses(requestId: String,
+                        onChange: @escaping ([DonorResponse], Bool) -> Void) -> ListenerRegistration {
+        Firestore.firestore().collection("requests").document(requestId)
+            .collection("responses")
+            .addSnapshotListener { snapshot, error in
+                if let error {
+                    print("[BloodLink notify] responses listener error: \(error.localizedDescription)")
+                    return
+                }
+                guard let snapshot else { return }
+                let items = snapshot.documents.compactMap {
+                    DonorResponse(id: $0.documentID, requestId: requestId, data: $0.data())
+                }
+                onChange(items, !snapshot.metadata.isFromCache)
+            }
+    }
+}
+
 // MARK: - Notification manager
 // Watches Firestore in the background (once someone is logged in) and shows a banner
 // when something new happens:
@@ -29,13 +70,18 @@ final class NotificationManager: ObservableObject {
     private var donorProfile: DonorProfile?
     private var listeningGroup: BloodGroup?
     private var knownRequestIds: Set<String> = []
-    private var requestsLoaded = false
+    private var requestsBaselineDone = false
 
     // Requester state
     private var myRequestsListener: ListenerRegistration?
     private var responseListeners: [String: ListenerRegistration] = [:]
     private var myRequests: [String: BloodRequest] = [:]
     private var seenResponses: [String: Set<String>] = [:]
+    private var responseBaselineDone: Set<String> = []
+
+    private func log(_ message: String) {
+        print("[BloodLink notify] \(message)")
+    }
 
     // MARK: Start / stop
 
@@ -44,6 +90,7 @@ final class NotificationManager: ObservableObject {
         stop()
         currentUid = uid
         currentRole = role
+        log("start as \(role.rawValue)")
         switch role {
         case .donor:
             startDonor(uid: uid)
@@ -67,9 +114,10 @@ final class NotificationManager: ObservableObject {
         donorProfile = nil
         listeningGroup = nil
         knownRequestIds = []
-        requestsLoaded = false
+        requestsBaselineDone = false
         myRequests = [:]
         seenResponses = [:]
+        responseBaselineDone = []
         currentUid = nil
         currentRole = nil
 
@@ -88,6 +136,7 @@ final class NotificationManager: ObservableObject {
         profileListener = DataService.shared.listenToDonorProfile(uid: uid) { [weak self] profile in
             guard let self else { return }
             self.donorProfile = profile
+            self.log("donor profile update: \(profile == nil ? "none yet" : "loaded")")
             self.updateRequestsListener(uid: uid)
         }
     }
@@ -98,7 +147,7 @@ final class NotificationManager: ObservableObject {
             requestsListener = nil
             listeningGroup = nil
             knownRequestIds = []
-            requestsLoaded = false
+            requestsBaselineDone = false
             return
         }
         if group == listeningGroup { return }
@@ -106,28 +155,38 @@ final class NotificationManager: ObservableObject {
         requestsListener?.remove()
         listeningGroup = group
         knownRequestIds = []
-        requestsLoaded = false
-        requestsListener = DataService.shared.listenToOpenRequests(bloodGroup: group) { [weak self] result in
-            guard let self, case .success(let items) = result else { return }
-            self.handleOpenRequests(items, uid: uid)
+        requestsBaselineDone = false
+        requestsListener = DataService.shared.watchOpenRequests(bloodGroup: group) { [weak self] items, fromServer in
+            self?.handleOpenRequests(items, fromServer: fromServer, uid: uid)
         }
     }
 
-    private func handleOpenRequests(_ items: [BloodRequest], uid: String) {
+    private func handleOpenRequests(_ items: [BloodRequest], fromServer: Bool, uid: String) {
         let ids = Set(items.map { $0.id })
-        defer {
+
+        // Until the first real server snapshot arrives, just remember what already exists
+        if !requestsBaselineDone {
             knownRequestIds = ids
-            requestsLoaded = true
+            if fromServer { requestsBaselineDone = true }
+            log("donor baseline: \(ids.count) open request(s), fromServer=\(fromServer)")
+            return
         }
 
-        // The first snapshot only records what already exists, so there is no banner on login
-        guard requestsLoaded, let profile = donorProfile, profile.isAvailable else { return }
+        let previous = knownRequestIds
+        knownRequestIds = ids
+
+        guard let profile = donorProfile, profile.isAvailable else {
+            log("donor update ignored (no profile or marked not available)")
+            return
+        }
 
         let newMatches = items.filter {
-            !knownRequestIds.contains($0.id) &&
+            !previous.contains($0.id) &&
             sameCity($0.city, profile.city) &&
             $0.requesterId != uid
         }
+        log("donor update: \(items.count) open, \(newMatches.count) new match(es)")
+
         guard let newest = newMatches.sorted(by: { $0.createdAt > $1.createdAt }).first else { return }
 
         var message = "\(newest.bloodGroup.rawValue) needed at \(newest.hospital), \(newest.city) (\(newest.urgency.rawValue))"
@@ -151,9 +210,8 @@ final class NotificationManager: ObservableObject {
 
         for request in items where responseListeners[request.id] == nil {
             let requestId = request.id
-            responseListeners[requestId] = DataService.shared.listenToResponses(requestId: requestId) { [weak self] result in
-                guard let self, case .success(let responses) = result else { return }
-                self.handleResponses(responses, requestId: requestId)
+            responseListeners[requestId] = DataService.shared.watchResponses(requestId: requestId) { [weak self] responses, fromServer in
+                self?.handleResponses(responses, fromServer: fromServer, requestId: requestId)
             }
         }
 
@@ -161,20 +219,27 @@ final class NotificationManager: ObservableObject {
             listener.remove()
             responseListeners[id] = nil
             seenResponses[id] = nil
+            responseBaselineDone.remove(id)
         }
     }
 
-    private func handleResponses(_ responses: [DonorResponse], requestId: String) {
+    private func handleResponses(_ responses: [DonorResponse], fromServer: Bool, requestId: String) {
         let keys = Set(responses.map { "\($0.id)-\($0.isAvailable)" })
-        let previous = seenResponses[requestId]
+        let previous = seenResponses[requestId] ?? []
         seenResponses[requestId] = keys
 
-        // The first snapshot for a request only records existing responses
-        guard let previous else { return }
+        // Until the first real server snapshot arrives, just remember existing responses
+        if !responseBaselineDone.contains(requestId) {
+            if fromServer { responseBaselineDone.insert(requestId) }
+            log("requester baseline for request \(requestId.prefix(6)): \(responses.count) response(s), fromServer=\(fromServer)")
+            return
+        }
 
         let newlyAvailable = responses.filter {
             $0.isAvailable && !previous.contains("\($0.id)-true")
         }
+        log("requester update for request \(requestId.prefix(6)): \(newlyAvailable.count) newly available")
+
         guard let donor = newlyAvailable.first, let request = myRequests[requestId] else { return }
 
         show(title: "Donor available",
@@ -190,6 +255,7 @@ final class NotificationManager: ObservableObject {
     }
 
     private func show(title: String, message: String, isPositive: Bool) {
+        log("SHOW BANNER: \(title) – \(message)")
         dismissWork?.cancel()
         banner = BannerItem(title: title, message: message, isPositive: isPositive)
 
@@ -234,4 +300,4 @@ struct NotificationBannerView: View {
         .padding(.top, 4)
         .onTapGesture(perform: onTap)
     }
-}   
+}
