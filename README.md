@@ -7,13 +7,14 @@ BloodLink is an iOS app that connects people who urgently need blood with nearby
 ## Features
 
 - **Role-based accounts:** sign up as a Donor or Requester, each with their own dashboard. Admin accounts can't be created from the sign-up screen; an admin is a user whose `role` is set to `admin` in Firestore (the demo data includes one)
+- **Strong passwords:** sign-up requires at least 8 characters with an uppercase letter, a lowercase letter, a number, and a special character, with a live checklist
 - **Donor profile:** name, phone, blood group, city, and an availability toggle
 - **Blood requests:** create, edit, and delete requests with patient details, units needed, hospital, city, urgency (Normal / Urgent / Critical), contact number, and notes
 - **Smart matching:** donors only see open requests that match their blood group, filtered by city and availability
 - **Donor responses:** donors mark themselves Available or Not Available, and requesters see who responded
 - **Real-time updates:** Firestore snapshot listeners keep every dashboard in sync without refreshing
 - **In-app notification banner:** a lightweight stand-in for push notifications
-- **Admin dashboard:** view every request in the system and update or close its status
+- **Admin dashboard:** view every request in the system, filter by status, update or close a request, and delete it (with confirmation)
 - **Firestore security rules:** users can only change their own data, and admin actions are restricted to admins
 
 ## Tech Stack
@@ -27,15 +28,9 @@ BloodLink is an iOS app that connects people who urgently need blood with nearby
 
 ## Screenshots
 
-<!-- Add screenshots here, e.g. ![Login](screenshots/login.png) -->
-
 | Login | Donor Dashboard | Requester Dashboard | Admin Dashboard |
-|---|---|---|---|
-| _<img width="518" height="1058" alt="image" src="https://github.com/user-attachments/assets/e141bf11-0d98-44ea-bb75-54dd91a9a988" />
-_ | _<img width="518" height="1058" alt="image" src="https://github.com/user-attachments/assets/cf15cbc5-ff6b-4a99-b9c5-dfed87886c69" />
-_ | _<img width="518" height="1058" alt="image" src="https://github.com/user-attachments/assets/c0eef15a-ff06-4da0-8417-88e19e538ad9" />
-_ | _<img width="518" height="1058" alt="image" src="https://github.com/user-attachments/assets/dcdd3520-dba0-4ccb-ab4d-f5f93d522de1" />
-_ |
+|:---:|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/e141bf11-0d98-44ea-bb75-54dd91a9a988" width="180" alt="screenshot"> | <img src="https://github.com/user-attachments/assets/cf15cbc5-ff6b-4a99-b9c5-dfed87886c69" width="180" alt="screenshot"> | <img src="https://github.com/user-attachments/assets/c0eef15a-ff06-4da0-8417-88e19e538ad9" width="180" alt="screenshot"> | <img src="https://github.com/user-attachments/assets/dcdd3520-dba0-4ccb-ab4d-f5f93d522de1" width="180" alt="screenshot"> |
 
 ## Getting Started
 
