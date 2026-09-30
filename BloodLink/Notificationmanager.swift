@@ -77,9 +77,18 @@ final class NotificationManager: ObservableObject {
     private var responseListeners: [String: ListenerRegistration] = [:]
     private var myRequests: [String: BloodRequest] = [:]
     private var seenResponses: [String: Set<String>] = [:]
+    private var responseBaselineDone: Set<String> = []
+
+    // Timestamps in the logs, so you can measure how long each step really takes
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss.SSS"
+        return formatter
+    }()
 
     private func log(_ message: String) {
-        print("[BloodLink notify] \(message)")
+        let time = Self.timeFormatter.string(from: Date())
+        print("[BloodLink notify \(time)] \(message)")
     }
 
     // MARK: Start / stop
@@ -116,6 +125,7 @@ final class NotificationManager: ObservableObject {
         requestsBaselineDone = false
         myRequests = [:]
         seenResponses = [:]
+        responseBaselineDone = []
         currentUid = nil
         currentRole = nil
 
@@ -208,6 +218,7 @@ final class NotificationManager: ObservableObject {
 
         for request in items where responseListeners[request.id] == nil {
             let requestId = request.id
+            log("requester: attaching responses listener for request \(requestId.prefix(6))")
             responseListeners[requestId] = DataService.shared.watchResponses(requestId: requestId) { [weak self] responses, fromServer in
                 self?.handleResponses(responses, fromServer: fromServer, requestId: requestId)
             }
@@ -217,24 +228,27 @@ final class NotificationManager: ObservableObject {
             listener.remove()
             responseListeners[id] = nil
             seenResponses[id] = nil
+            responseBaselineDone.remove(id)
         }
     }
 
     private func handleResponses(_ responses: [DonorResponse], fromServer: Bool, requestId: String) {
         let keys = Set(responses.map { "\($0.id)-\($0.isAvailable)" })
-        let previous = seenResponses[requestId]
+        let previous = seenResponses[requestId] ?? []
         seenResponses[requestId] = keys
 
-        // First callback for this request just records what's already there — no banner yet.
-        guard let previous else {
-            log("requester baseline for request \(requestId.prefix(6)): \(responses.count) response(s)")
+        // Until the first real server snapshot arrives, only remember what already exists.
+        // (A stale cached snapshot must not make old responses look "new".)
+        if !responseBaselineDone.contains(requestId) {
+            if fromServer { responseBaselineDone.insert(requestId) }
+            log("requester baseline for request \(requestId.prefix(6)): \(responses.count) response(s), fromServer=\(fromServer)")
             return
         }
 
         let newlyAvailable = responses.filter {
             $0.isAvailable && !previous.contains("\($0.id)-true")
         }
-        log("requester update for request \(requestId.prefix(6)): \(newlyAvailable.count) newly available")
+        log("requester update for request \(requestId.prefix(6)): \(newlyAvailable.count) newly available, fromServer=\(fromServer)")
 
         guard let donor = newlyAvailable.first, let request = myRequests[requestId] else { return }
 

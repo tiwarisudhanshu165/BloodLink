@@ -92,6 +92,7 @@ private struct AdminRequestRow: View {
     let request: BloodRequest
     @State private var isUpdating = false
     @State private var errorMessage: String?
+    @State private var showDeleteConfirm = false
 
     private var statusColor: Color {
         switch request.status {
@@ -130,6 +131,17 @@ private struct AdminRequestRow: View {
                 statusButton("Open", target: .open)
                 statusButton("Fulfilled", target: .fulfilled)
                 statusButton("Closed", target: .closed)
+
+                Spacer()
+
+                Button(role: .destructive) {
+                    showDeleteConfirm = true
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .font(.caption)
+                .buttonStyle(.bordered)
+                .tint(.red)
             }
             .disabled(isUpdating)
 
@@ -140,6 +152,23 @@ private struct AdminRequestRow: View {
             }
         }
         .padding(.vertical, 4)
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button(role: .destructive) {
+                showDeleteConfirm = true
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .confirmationDialog("Delete this request?",
+                            isPresented: $showDeleteConfirm,
+                            titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
+                Task { await deleteRequest() }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This also removes all donor responses for it. This can't be undone.")
+        }
     }
 
     @ViewBuilder
@@ -158,6 +187,17 @@ private struct AdminRequestRow: View {
         errorMessage = nil
         do {
             try await DataService.shared.setRequestStatus(id: request.id, status: status)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isUpdating = false
+    }
+
+    private func deleteRequest() async {
+        isUpdating = true
+        errorMessage = nil
+        do {
+            try await DataService.shared.deleteRequest(id: request.id)
         } catch {
             errorMessage = error.localizedDescription
         }

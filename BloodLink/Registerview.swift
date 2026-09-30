@@ -9,6 +9,20 @@ struct RegisterView: View {
     @State private var confirmPassword = ""
     @State private var selectedRole: UserRole = .donor
 
+    // MARK: - Password rules
+
+    private var hasMinLength: Bool { password.count >= 8 }
+    private var hasUppercase: Bool { password.contains { $0.isUppercase } }
+    private var hasLowercase: Bool { password.contains { $0.isLowercase } }
+    private var hasNumber: Bool { password.contains { $0.isNumber } }
+    private var hasSpecial: Bool {
+        password.contains { !$0.isLetter && !$0.isNumber && !$0.isWhitespace }
+    }
+
+    private var isPasswordValid: Bool {
+        hasMinLength && hasUppercase && hasLowercase && hasNumber && hasSpecial
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
@@ -23,6 +37,15 @@ struct RegisterView: View {
 
                 SecureField("Password", text: $password)
                     .textFieldStyle(.roundedBorder)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    ruleRow("At least 8 characters", met: hasMinLength)
+                    ruleRow("One uppercase letter (A-Z)", met: hasUppercase)
+                    ruleRow("One lowercase letter (a-z)", met: hasLowercase)
+                    ruleRow("One number (0-9)", met: hasNumber)
+                    ruleRow("One special character (e.g. @ # $ !)", met: hasSpecial)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 SecureField("Confirm Password", text: $confirmPassword)
                     .textFieldStyle(.roundedBorder)
@@ -61,7 +84,10 @@ struct RegisterView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(email.isEmpty || password.isEmpty || password != confirmPassword || authViewModel.isLoading)
+                .disabled(email.isEmpty
+                          || !isPasswordValid
+                          || password != confirmPassword
+                          || authViewModel.isLoading)
             }
             .padding()
             .toolbar {
@@ -71,5 +97,14 @@ struct RegisterView: View {
             }
         }
     }
-}
 
+    private func ruleRow(_ text: String, met: Bool) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: met ? "checkmark.circle.fill" : "circle")
+                .foregroundColor(met ? .green : .secondary)
+            Text(text)
+                .foregroundColor(met ? .green : .secondary)
+        }
+        .font(.caption)
+    }
+}
