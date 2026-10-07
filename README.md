@@ -1,5 +1,14 @@
 # 🩸 BloodLink
 
+An iOS project under the mentorship of **Anjali Srivastava**
+
+**Team**
+
+| Member | Focus |
+|---|---|
+| **Sudhanshu Tiwari** | SwiftUI interface, authentication & role-based dashboards, Firestore data layer |
+| **Samarth Soni** | Matching logic, real-time sync & notifications, admin dashboard, Firestore security rules |
+
 BloodLink is an iOS app that connects people who urgently need blood with nearby donors. A requester posts a blood request, matching donors see it live, and they respond with a single tap: **Available** or **Not Available**.
 
 > Academic prototype built for a college project. Push notifications are simulated with an in-app banner.
@@ -157,8 +166,3 @@ service cloud.firestore {
 - Matching currently uses exact blood group, city, and availability; compatible-group matching (e.g. O- donors for any group) could be added
 - Distance-based matching with location services
 - Donor donation history and a cooldown period between donations
-
-## Team
-
-- Sudhanshu Tiwari
-- Samarth Soni
